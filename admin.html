@@ -1,0 +1,851 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TCU Smart Clinic | Admin Dashboard</title>
+
+  <!-- EmailJS browser library -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #fff5f5;
+      color: #333;
+    }
+
+    header {
+      background: linear-gradient(135deg, #8f1019, #cf2632);
+      color: white;
+      padding: 22px 6%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+      box-shadow: 0 4px 15px #9b17221c;
+    }
+
+    header h1 {
+      font-size: 23px;
+    }
+
+    header p {
+      margin-top: 5px;
+      font-size: 13px;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      padding: 11px 16px;
+      font-weight: bold;
+    }
+
+    button:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    .logout {
+      background: white;
+      color: #a71923;
+    }
+
+    main {
+      width: 92%;
+      max-width: 1250px;
+      margin: 35px auto;
+    }
+
+    .welcome {
+      margin-bottom: 25px;
+    }
+
+    .welcome h2,
+    .panel h2,
+    .login-box h2 {
+      color: #a71923;
+    }
+
+    .welcome h2 {
+      margin-bottom: 8px;
+    }
+
+    .welcome p {
+      color: #777;
+      line-height: 1.5;
+    }
+
+    .notice {
+      padding: 13px 15px;
+      margin: 18px 0;
+      border-radius: 8px;
+      background: #fff0f0;
+      color: #8f1019;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
+      margin: 25px 0;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 22px;
+      border-radius: 13px;
+      box-shadow: 0 5px 20px #6c11110b;
+      border-left: 5px solid #c91f2a;
+    }
+
+    .stat-card p {
+      color: #777;
+      font-size: 14px;
+    }
+
+    .stat-card h3 {
+      margin-top: 12px;
+      font-size: 30px;
+      color: #a71923;
+    }
+
+    .panel {
+      background: white;
+      border-radius: 13px;
+      padding: 23px;
+      box-shadow: 0 5px 20px #6c11110b;
+    }
+
+    .panel h2 {
+      margin-bottom: 18px;
+      font-size: 21px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1050px;
+    }
+
+    th, td {
+      padding: 14px 12px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+      font-size: 13px;
+    }
+
+    th {
+      background: #fff0f0;
+      color: #8f1019;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 6px 9px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .pending {
+      background: #fff1ce;
+      color: #875d00;
+    }
+
+    .approved {
+      background: #dff5e6;
+      color: #176b37;
+    }
+
+    .rejected {
+      background: #ffe0e0;
+      color: #a71923;
+    }
+
+    .queue {
+      font-weight: bold;
+      color: #a71923;
+    }
+
+    .actions {
+      display: flex;
+      gap: 7px;
+      min-width: 170px;
+    }
+
+    .action-btn {
+      padding: 8px 10px;
+      font-size: 12px;
+      white-space: nowrap;
+      color: white;
+    }
+
+    .approve-btn {
+      background: #18864b;
+    }
+
+    .reject-btn {
+      background: #b51d28;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 30px;
+      color: #777;
+    }
+
+    .login-box {
+      max-width: 420px;
+      margin: 75px auto;
+      padding: 30px;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 8px 30px #6c11111a;
+    }
+
+    .login-box h2 {
+      margin-bottom: 10px;
+    }
+
+    .login-box p {
+      color: #777;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin: 15px 0 7px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      outline-color: #c91f2a;
+    }
+
+    .primary {
+      background: #b51d28;
+      color: white;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    .primary:hover {
+      background: #8f1019;
+    }
+
+    footer {
+      text-align: center;
+      padding: 25px;
+      color: #888;
+      font-size: 12px;
+    }
+
+    @media (max-width: 800px) {
+      .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 500px) {
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      header h1 {
+        font-size: 19px;
+      }
+
+      .panel {
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div>
+      <h1>✚ TCU Smart Clinic</h1>
+      <p>Administrator Dashboard</p>
+    </div>
+    <button id="logoutBtn" class="logout hidden">Log Out</button>
+  </header>
+
+  <section id="loginSection" class="login-box">
+    <h2>Admin Login</h2>
+    <p>Sign in using your authorized clinic administrator account.</p>
+
+    <form id="loginForm">
+      <label for="adminEmail">Admin Email</label>
+      <input
+        id="adminEmail"
+        type="email"
+        required
+        autocomplete="username"
+        placeholder="Enter admin email"
+      >
+
+      <label for="adminPassword">Password</label>
+      <input
+        id="adminPassword"
+        type="password"
+        required
+        autocomplete="current-password"
+        placeholder="Enter password"
+      >
+
+      <button id="loginBtn" class="primary" type="submit">
+        Sign In
+      </button>
+    </form>
+
+    <div id="loginMessage" class="notice hidden" role="status"></div>
+  </section>
+
+  <main id="dashboard" class="hidden">
+    <section class="welcome">
+      <h2>Appointment Management</h2>
+      <p>Review TCU student clinic appointment requests and monitor their current status.</p>
+      <div id="adminMessage" class="notice" role="status">
+        Loading appointment requests...
+      </div>
+    </section>
+
+    <section class="stats">
+      <div class="stat-card">
+        <p>Total Requests</p>
+        <h3 id="totalCount">0</h3>
+      </div>
+
+      <div class="stat-card">
+        <p>Pending Requests</p>
+        <h3 id="pendingCount">0</h3>
+      </div>
+
+      <div class="stat-card">
+        <p>Approved Requests</p>
+        <h3 id="approvedCount">0</h3>
+      </div>
+
+      <div class="stat-card">
+        <p>Rejected Requests</p>
+        <h3 id="rejectedCount">0</h3>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Student Appointment Requests</h2>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Student Name</th>
+              <th>Student ID</th>
+              <th>Email</th>
+              <th>Appointment Date</th>
+              <th>Time</th>
+              <th>Reason</th>
+              <th>Status</th>
+              <th>Queue No.</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody id="appointmentTable">
+            <tr>
+              <td colspan="9" class="empty">Loading requests...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    TCU Smart Clinic Appointment and Queue System
+  </footer>
+
+  <script type="module">
+    import { initializeApp }
+      from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      onAuthStateChanged,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+
+    import {
+      getFirestore,
+      collection,
+      query,
+      orderBy,
+      onSnapshot,
+      doc,
+      getDoc,
+      runTransaction,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+
+    // EMAILJS CONFIGURATION
+const EMAILJS_PUBLIC_KEY = "_uvQY8eNV2TgMcyyo";
+const EMAILJS_SERVICE_ID = "service_jbh4rxa";
+const EMAILJS_TEMPLATE_ID = "template_08zut0e";
+
+// Initialize EmailJS
+emailjs.init({
+    publicKey: EMAILJS_PUBLIC_KEY
+});
+
+
+    // YOUR FIREBASE CONFIGURATION
+    // Keep this consistent with your other website pages.
+    const firebaseConfig = {
+      apiKey: "AIzaSyDxijMAruXZOB1E-ZyAr69ZqBJJ1HqgcKM",
+      authDomain: "tcu-smart-clinic.firebaseapp.com",
+      projectId: "tcu-smart-clinic",
+      storageBucket: "tcu-smart-clinic.firebasestorage.app",
+      messagingSenderId: "702594747976",
+      appId: "1:702594747976:web:10771e4ce955031ee8d27d",
+      measurementId: "G-GQJN5CEPTC"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+
+
+
+
+
+    const loginSection = document.getElementById("loginSection");
+    const dashboard = document.getElementById("dashboard");
+    const loginForm = document.getElementById("loginForm");
+    const loginBtn = document.getElementById("loginBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const loginMessage = document.getElementById("loginMessage");
+    const adminMessage = document.getElementById("adminMessage");
+    const appointmentTable = document.getElementById("appointmentTable");
+
+    let stopListening = null;
+    const busyAppointments = new Set();
+    let authCheckNumber = 0;
+
+
+    function showMessage(element, message) {
+      element.textContent = message;
+      element.classList.remove("hidden");
+    }
+
+    function hideDashboard() {
+      if (stopListening) {
+        stopListening();
+        stopListening = null;
+      }
+
+      dashboard.classList.add("hidden");
+      logoutBtn.classList.add("hidden");
+      appointmentTable.replaceChildren();
+    }
+
+
+    // ADMIN LOGIN
+    loginForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      loginBtn.disabled = true;
+      loginBtn.textContent = "Signing in...";
+      loginMessage.classList.add("hidden");
+
+      try {
+        await signInWithEmailAndPassword(
+          auth,
+          document.getElementById("adminEmail").value.trim(),
+          document.getElementById("adminPassword").value
+        );
+      } catch (error) {
+        console.error("Login error:", error);
+        showMessage(
+          loginMessage,
+          "Sign-in failed. Check your admin email and password."
+        );
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = "Sign In";
+      }
+    });
+
+
+    // LOG OUT
+    logoutBtn.addEventListener("click", async () => {
+      try {
+        await signOut(auth);
+      } catch (error) {
+        console.error(error);
+        alert("Unable to log out. Please try again.");
+      }
+    });
+
+
+    // VERIFY ADMIN BEFORE SHOWING APPOINTMENTS
+    onAuthStateChanged(auth, async (user) => {
+      const thisCheck = ++authCheckNumber;
+
+      hideDashboard();
+      loginMessage.classList.add("hidden");
+
+      if (!user) {
+        loginSection.classList.remove("hidden");
+        return;
+      }
+
+      try {
+        const adminRef = doc(db, "admins", user.uid);
+        const adminSnapshot = await getDoc(adminRef);
+
+        // Ignore an outdated verification result.
+        if (thisCheck !== authCheckNumber) return;
+
+        if (!adminSnapshot.exists()) {
+          await signOut(auth);
+
+          if (thisCheck === authCheckNumber) {
+            loginSection.classList.remove("hidden");
+            showMessage(
+              loginMessage,
+              "Access denied. This account is not an authorized administrator."
+            );
+          }
+          return;
+        }
+
+        loginSection.classList.add("hidden");
+        dashboard.classList.remove("hidden");
+        logoutBtn.classList.remove("hidden");
+
+        listenForAppointments();
+
+      } catch (error) {
+        console.error("Admin verification failed:", error);
+
+        if (thisCheck === authCheckNumber) {
+          await signOut(auth);
+          loginSection.classList.remove("hidden");
+          showMessage(
+            loginMessage,
+            "Could not verify admin permission. Check your Firestore rules."
+          );
+        }
+      }
+    });
+
+
+    // LIVE APPOINTMENT LIST
+    function listenForAppointments() {
+      if (stopListening) stopListening();
+
+      const requestsQuery = query(
+        collection(db, "appointments"),
+        orderBy("createdAt", "desc")
+      );
+
+      stopListening = onSnapshot(requestsQuery, (snapshot) => {
+        const requests = snapshot.docs.map((item) => ({
+          id: item.id,
+          ...item.data()
+        }));
+
+        const pending = requests.filter(
+          item => String(item.status || "Pending").toLowerCase() === "pending"
+        ).length;
+
+        const approved = requests.filter(
+          item => String(item.status || "").toLowerCase() === "approved"
+        ).length;
+
+        const rejected = requests.filter(
+          item => String(item.status || "").toLowerCase() === "rejected"
+        ).length;
+
+        document.getElementById("totalCount").textContent = requests.length;
+        document.getElementById("pendingCount").textContent = pending;
+        document.getElementById("approvedCount").textContent = approved;
+        document.getElementById("rejectedCount").textContent = rejected;
+
+        appointmentTable.replaceChildren();
+
+        if (requests.length === 0) {
+          const row = document.createElement("tr");
+          const cell = document.createElement("td");
+          cell.colSpan = 9;
+          cell.className = "empty";
+          cell.textContent = "No appointment requests found.";
+          row.appendChild(cell);
+          appointmentTable.appendChild(row);
+        }
+
+        requests.forEach((item) => {
+          const row = document.createElement("tr");
+          const status = String(item.status || "Pending");
+          const normalizedStatus = status.toLowerCase();
+
+          const values = [
+            item.patientName || item.fullName || "—",
+            item.studentNumber || item.studentId || "—",
+            item.email || "—",
+            item.appointmentDate || "—",
+            item.appointmentTime || "—",
+            item.reason || item.appointmentType || "—"
+          ];
+
+          values.forEach(value => {
+            const cell = document.createElement("td");
+            cell.textContent = String(value);
+            row.appendChild(cell);
+          });
+
+          const statusCell = document.createElement("td");
+          const badge = document.createElement("span");
+
+          badge.className = "status " +
+            (normalizedStatus === "approved" ? "approved" :
+             normalizedStatus === "rejected" ? "rejected" : "pending");
+
+          badge.textContent = status;
+          statusCell.appendChild(badge);
+          row.appendChild(statusCell);
+
+          const queueCell = document.createElement("td");
+          queueCell.className = "queue";
+          queueCell.textContent = item.queueNumber || "—";
+          row.appendChild(queueCell);
+
+          const actionCell = document.createElement("td");
+          const actionWrap = document.createElement("div");
+          actionWrap.className = "actions";
+
+          if (normalizedStatus === "pending") {
+            const approveButton = document.createElement("button");
+            approveButton.textContent = "Approve";
+            approveButton.className = "action-btn approve-btn";
+
+            const rejectButton = document.createElement("button");
+            rejectButton.textContent = "Reject";
+            rejectButton.className = "action-btn reject-btn";
+
+            approveButton.addEventListener("click", () =>
+              updateAppointment(item, "Approved", approveButton, rejectButton)
+            );
+
+            rejectButton.addEventListener("click", () =>
+              updateAppointment(item, "Rejected", approveButton, rejectButton)
+            );
+
+            actionWrap.append(approveButton, rejectButton);
+          } else {
+            const label = document.createElement("span");
+            label.textContent = "Reviewed";
+            actionWrap.appendChild(label);
+          }
+
+          actionCell.appendChild(actionWrap);
+          row.appendChild(actionCell);
+          appointmentTable.appendChild(row);
+        });
+
+        showMessage(adminMessage, "Appointment requests are up to date.");
+
+      }, (error) => {
+        console.error("Firestore error:", error);
+
+        showMessage(
+          adminMessage,
+          "Unable to load appointments. Check Firestore rules and collection fields."
+        );
+      });
+    }
+
+
+    // APPROVE OR REJECT AN APPOINTMENT
+    async function updateAppointment(
+      item,
+      newStatus,
+      approveButton,
+      rejectButton
+    ) {
+      if (busyAppointments.has(item.id)) return;
+
+      const studentName = item.patientName || item.fullName || "this student";
+
+      const confirmation = newStatus === "Approved"
+        ? `Approve the appointment for ${studentName} and assign a queue number?`
+        : `Reject the appointment for ${studentName}?`;
+
+      if (!confirm(confirmation)) return;
+
+      busyAppointments.add(item.id);
+      approveButton.disabled = true;
+      rejectButton.disabled = true;
+
+      try {
+        const appointmentRef = doc(db, "appointments", item.id);
+        let assignedQueue = null;
+        let appointmentData = null;
+
+        await runTransaction(db, async (transaction) => {
+          const appointmentSnapshot = await transaction.get(appointmentRef);
+
+          if (!appointmentSnapshot.exists()) {
+            throw new Error("Appointment no longer exists.");
+          }
+
+          const current = appointmentSnapshot.data();
+          const currentStatus = String(
+            current.status || "Pending"
+          ).toLowerCase();
+
+          if (currentStatus !== "pending") {
+            throw new Error("This appointment has already been reviewed.");
+          }
+
+          appointmentData = current;
+          let queueNumber = null;
+
+          if (newStatus === "Approved") {
+            const counterRef = doc(db, "settings", "queueCounter");
+            const counterSnapshot = await transaction.get(counterRef);
+
+            const nextNumber = counterSnapshot.exists()
+              ? Number(counterSnapshot.data().lastNumber || 0) + 1
+              : 1;
+
+            transaction.set(counterRef, {
+              lastNumber: nextNumber,
+              updatedAt: serverTimestamp()
+            }, { merge: true });
+
+            queueNumber = "Q" + String(nextNumber).padStart(3, "0");
+            assignedQueue = queueNumber;
+          }
+
+          transaction.update(appointmentRef, {
+            status: newStatus,
+            queueNumber: queueNumber,
+            updatedAt: serverTimestamp()
+          });
+        });
+
+        // Firestore is updated first. Email failure will not undo approval.
+        let emailMessage = "";
+
+        try {
+          await sendAppointmentEmail(
+            appointmentData,
+            newStatus,
+            assignedQueue
+          );
+
+          emailMessage = emailConfigured
+            ? " Email notification sent."
+            : " Email is not configured yet.";
+        } catch (emailError) {
+          console.error("Email sending failed:", emailError);
+          emailMessage = " Status saved, but email sending failed.";
+        }
+
+        const resultMessage = newStatus === "Approved"
+          ? `Appointment approved. Queue number: ${assignedQueue || "not assigned"}.${emailMessage}`
+          : `Appointment rejected.${emailMessage}`;
+
+        showMessage(adminMessage, resultMessage);
+        alert(resultMessage);
+
+      } catch (error) {
+        console.error("Appointment update failed:", error);
+
+        alert(
+          "Could not update appointment: " +
+          (error.message || "Please check Firestore rules.")
+        );
+
+      } finally {
+        busyAppointments.delete(item.id);
+      }
+    }
+
+
+    // EMAIL NOTIFICATION
+    async function sendAppointmentEmail(
+      appointment,
+      status,
+      queueNumber
+    ) {
+      if (!emailConfigured || !window.emailjs) {
+        console.info(
+          "EmailJS is not configured. Appointment status was still saved."
+        );
+        return;
+      }
+
+      const recipientEmail = appointment?.email;
+
+      if (!recipientEmail) {
+        throw new Error("The appointment does not contain a student email.");
+      }
+
+      const studentName =
+        appointment.patientName ||
+        appointment.fullName ||
+        "TCU Student";
+
+      const templateParams = {
+        to_email: recipientEmail,
+        student_name: studentName,
+        appointment_date: appointment.appointmentDate || "Not specified",
+        appointment_time: appointment.appointmentTime || "Not specified",
+        appointment_status: status,
+        queue_number: status === "Approved"
+          ? (queueNumber || "Not assigned")
+          : "Not applicable",
+        message: status === "Approved"
+          ? `Your clinic appointment has been approved. Your queue number is ${queueNumber}.`
+          : "Your clinic appointment request has been rejected. Please contact the clinic for more information."
+      };
+
+    }
+  </script>
+
+</body>
+</html>
